@@ -1,30 +1,23 @@
-// This is a basic Flutter widget test.
+// Smoke test for the RapidCare home screen.
 //
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// The original template test referenced `MyApp` (never existed in this
+// project) and a counter UI this app doesn't have, so `flutter analyze` and
+// `flutter test` always failed. This version verifies the screen that actually
+// ships.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:rapidcare_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  testWidgets('Home screen renders with branding and the SOS button',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const RapidCareApp());
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('RapidCare'), findsOneWidget);
+    expect(find.text('Emergency Assistance'), findsOneWidget);
+    expect(find.text('SOS'), findsOneWidget);
+    expect(find.text('Services Online'), findsOneWidget);
   });
 }

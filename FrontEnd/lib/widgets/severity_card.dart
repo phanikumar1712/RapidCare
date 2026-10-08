@@ -59,7 +59,7 @@ class SeverityCard extends StatelessWidget {
                       letterSpacing: 1,
                     ),
                   ),
-                  if (severity != 'Unclassified') ...[
+                  if (severity != 'Unclassified' && confidence > 0) ...[
                     const SizedBox(height: 4),
                     Text(
                       '${(confidence * 100).toStringAsFixed(0)}% model confidence',

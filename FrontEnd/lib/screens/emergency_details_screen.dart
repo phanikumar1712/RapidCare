@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../utils/theme.dart';
@@ -34,7 +33,7 @@ class _EmergencyDetailsScreenState extends State<EmergencyDetailsScreen> {
 
     setState(() => _classifying = true);
     try {
-      final result = await ApiService.classifyInjury(File(picked.path));
+      final result = await ApiService.classifyInjury(picked);
       if (mounted) setState(() => _injuryClassification = result);
     } catch (e) {
       if (mounted) {
@@ -156,37 +155,75 @@ class _EmergencyDetailsScreenState extends State<EmergencyDetailsScreen> {
                               const Text('Analysing injury…', style: TextStyle(color: AppColors.textMuted)),
                             ],
                           )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                        : _injuryClassification == null
+                            // Classification failed (network error, bad photo,
+                            // …). Never use _injuryClassification! here: doing
+                            // so crashed the whole screen with "Unexpected null
+                            // value." as soon as a classification failed.
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.check_circle, color: AppColors.sevLow, size: 18),
-                                  const SizedBox(width: 8),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.error_outline, color: Colors.orange, size: 18),
+                                      const SizedBox(width: 8),
+                                      const Expanded(
+                                        child: Text(
+                                          'Could not classify this photo',
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
                                   Text(
-                                    'Detected: ${_injuryClassification!.injuryType}',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                    'Check the backend is running, then try again.',
+                                    style: TextStyle(fontSize: 12.5, color: AppColors.textMuted),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  TextButton.icon(
+                                    onPressed: _pickPhoto,
+                                    icon: const Icon(Icons.refresh, size: 16),
+                                    label: const Text('Retry'),
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: Size.zero,
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.check_circle, color: AppColors.sevLow, size: 18),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Detected: ${_injuryClassification!.injuryType}',
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Confidence: ${(_injuryClassification!.confidence * 100).toStringAsFixed(1)}%',
+                                    style: TextStyle(fontSize: 12.5, color: AppColors.textMuted),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  TextButton.icon(
+                                    onPressed: _pickPhoto,
+                                    icon: const Icon(Icons.refresh, size: 16),
+                                    label: const Text('Retake'),
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: Size.zero,
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Confidence: ${(_injuryClassification!.confidence * 100).toStringAsFixed(1)}%',
-                                style: TextStyle(fontSize: 12.5, color: AppColors.textMuted),
-                              ),
-                              const SizedBox(height: 10),
-                              TextButton.icon(
-                                onPressed: _pickPhoto,
-                                icon: const Icon(Icons.refresh, size: 16),
-                                label: const Text('Retake'),
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: Size.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                              ),
-                            ],
-                          ),
               ),
             ),
             const SizedBox(height: 16),

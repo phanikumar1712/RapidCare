@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
 import '../utils/constants.dart';
 import '../models/emergency_case.dart';
 import '../models/responder.dart';
@@ -134,17 +134,27 @@ class ApiService {
 
   /// POST /classify-injury — uploads an injury photo and returns the
   /// wound-type classification from the computer-vision model.
-  static Future<InjuryClassification> classifyInjury(File imageFile) async {
+  ///
+  /// Takes an [XFile] and uploads its bytes rather than a [dart:io] File
+  /// path: on web, image_picker only hands back a `blob:` object URL and
+  /// file-path based uploads (MultipartFile.fromPath) fail client-side
+  /// before the request is ever sent.
+  static Future<InjuryClassification> classifyInjury(XFile imageFile) async {
     try {
+      final bytes = await imageFile.readAsBytes();
+      final filename =
+          imageFile.name.isEmpty ? 'injury_photo.jpg' : imageFile.name;
+
       final request = http.MultipartRequest(
         'POST',
         Uri.parse('$_baseUrl/classify-injury'),
       );
       request.files.add(
-        await http.MultipartFile.fromPath(
+        http.MultipartFile.fromBytes(
           'file',
-          imageFile.path,
-          contentType: _imageMediaTypeFor(imageFile.path),
+          bytes,
+          filename: filename,
+          contentType: _imageMediaTypeFor(filename),
         ),
       );
 

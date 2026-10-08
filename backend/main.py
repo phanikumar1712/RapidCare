@@ -109,11 +109,13 @@ def create_sos(request: SOSRequest):
 
     # Predict severity from symptoms
     severity = None
+    severity_confidence = None
 
     if request.symptoms:
         prediction = predict_severity(request.symptoms)
 
         severity_class = prediction["severity_class"]
+        severity_confidence = prediction["confidence"]
 
         severity_mapping = {
             1: "High",
@@ -148,6 +150,10 @@ def create_sos(request: SOSRequest):
     return {
         "message": "SOS created successfully",
         "severity": severity,
+        # The triage model's confidence — the UI shows this on the severity
+        # card. Previously dropped here, which made the frontend display a
+        # misleading "0% model confidence" for every real classification.
+        "severity_confidence": severity_confidence,
         "case": response.data
     }
 @app.post("/dispatch/{case_id}")

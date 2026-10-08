@@ -24,8 +24,14 @@ class AppColors {
     switch (severity) {
       case 'Low':
         return sevLow;
+      case 'Low-Medium':
+        // The backend's 5-level scale also emits Low-Medium / Medium-High;
+        // without these the severity card rendered grey (unclassified).
+        return sevMedium;
       case 'Medium':
         return sevMedium;
+      case 'Medium-High':
+        return sevHigh;
       case 'High':
         return sevHigh;
       case 'Critical':
